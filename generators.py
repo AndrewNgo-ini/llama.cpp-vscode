@@ -1,7 +1,8 @@
 from transformers import AutoTokenizer, AutoModelForCausalLM, PreTrainedTokenizer, PreTrainedModel, GenerationConfig
 from transformers import Pipeline, pipeline
 import torch
-
+import requests
+import json
 
 class GeneratorBase:
     def generate(self, query: str, parameters: dict) -> str:
@@ -71,3 +72,28 @@ class ReplitCode(GeneratorBase):
         output_text: str = self.tokenizer.decode(
             output_ids[0], skip_special_tokens=True, clean_up_tokenization_spaces=False)
         return output_text
+
+class LlamaCpp(GeneratorBase):
+    def __init__(self) -> None:
+        pass
+
+    def generate(self, query: str, parameters: dict) -> str:
+        url = 'http://localhost:8080/completion'
+        headers = {
+            'Content-Type': 'application/json'
+        }
+
+        data = {
+            "prompt": query,
+            "n_predict": parameters["n_predict"]
+        }
+
+        response = requests.post(url, headers=headers, data=json.dumps(data))
+
+        if response.status_code == 200:
+            result = response.json()
+            # Handle the result as needed
+        else:
+            print(f"Request failed with status code: {response.status_code}") 
+
+        return result["content"]
