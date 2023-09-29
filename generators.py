@@ -85,7 +85,7 @@ class LlamaCpp(GeneratorBase):
 
         data = {
             "prompt": query,
-            "n_predict": parameters["n_predict"]
+            "n_predict": 128
         }
 
         response = requests.post(url, headers=headers, data=json.dumps(data))
